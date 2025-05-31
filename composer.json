@@ -2,7 +2,7 @@
   "name": "rocont/orchid-repeater-field",
   "description": "Adding support of repeater field to the Orchid RAD platform. Forked from Nks/orchid-repeater-field",
   "license": "wtfpl",
-  "version": "v13.1.0",
+  "version": "v13.1.1",
   "authors": [
     {
       "name": "Mikhail Margasov",
