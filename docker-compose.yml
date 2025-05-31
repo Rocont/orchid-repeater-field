@@ -1,21 +1,6 @@
 version: '3'
 
 services:
-
-  nginx:
-    image: nginx:alpine
-    container_name: repeater_nginx
-    volumes:
-      - .:/var/www/repeater/site
-      - ./docker/nginx/nginx.conf.template:/etc/nginx/templates/default.conf.template
-      - ./docker/nginx/log:/var/log/nginx
-    environment:
-        - DOCKER_NAME=repeater
-    networks:
-      - common
-    ports:
-      - "1001:80"
-
   php-fpm:
     build: ./docker/php-fpm
     image: repeater_php-fpm

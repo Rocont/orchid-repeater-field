@@ -4,9 +4,6 @@
 
 ## Brief
 
-We've all worked with WordPress at one time or another. Inspired
-by [Advanced Custom Fields](https://www.advancedcustomfields.com/).
-
 This package adding repeater fields support to [Orchid RAD platform](https://github.com/orchidsoftware/platform).
 
 ## Pre-requirements
