@@ -301,6 +301,9 @@ export default class extends ApplicationController {
                 ).dataset.containerKey}[${
                     field.closest('.repeater-item').dataset.sort}]${originalName}`;
 
+                if (field.hasAttribute('data-upload-name')) {
+                    field.setAttribute('data-upload-name', resultName);
+                }
                 field.setAttribute('name', resultName);
             });
         });
