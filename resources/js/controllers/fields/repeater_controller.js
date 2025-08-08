@@ -285,13 +285,14 @@ export default class extends ApplicationController {
                 const inputs = field.querySelectorAll('input[type="hidden"]');
                 if (inputs.length) {
                     inputs.forEach((input) => {
+                        let inputOriginalName = originalName;
                         if (field.getAttribute('multiple')) {
-                            originalName += '[]';
+                            inputOriginalName += '[]';
                         }
                         const resultInputName = `${input.closest(
                             '.repeaters_container',
                         ).dataset.containerKey}[${
-                            input.closest('.repeater-item').dataset.sort}]${originalName}`;
+                            input.closest('.repeater-item').dataset.sort}]${inputOriginalName}`;
                         input.setAttribute('name', resultInputName);
                     });
                 }
@@ -301,6 +302,7 @@ export default class extends ApplicationController {
                 ).dataset.containerKey}[${
                     field.closest('.repeater-item').dataset.sort}]${originalName}`;
 
+                console.log(resultName);
                 if (field.hasAttribute('data-upload-name')) {
                     field.setAttribute('data-upload-name', resultName);
                 }
