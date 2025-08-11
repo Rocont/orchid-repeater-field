@@ -68,7 +68,7 @@ class Repeater extends Field
         return $this;
     }
 
-    public static function make(string $name = null): self
+    public static function make(string $name = null): static
     {
         return (new static)->name($name)
             ->set('original_name', $name)
