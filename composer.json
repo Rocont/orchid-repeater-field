@@ -2,7 +2,7 @@
   "name": "rocont/orchid-repeater-field",
   "description": "Adding support of repeater field to the Orchid RAD platform. Forked from Nks/orchid-repeater-field",
   "license": "wtfpl",
-  "version": "v14.0.2",
+  "version": "v15.0.0",
   "authors": [
     {
       "name": "Mikhail Margasov",
@@ -23,7 +23,7 @@
   ],
   "require": {
     "laravel/framework": "^v11.0 || ^v12.0",
-    "orchid/platform": "^13 || ^14"
+    "orchid/platform": "^14.43.0"
   },
   "require-dev": {
     "mockery/mockery": "^1.1",
