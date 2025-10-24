@@ -64,18 +64,18 @@ class ServiceProvider extends BaseServiceProvider
         $this->publishes([
             ORCHID_REPEATER_FIELD_PACKAGE_PATH.'/resources/views' => base_path('resources/views/vendor/platform'),
         ], 'repeater-field.views');
+
+        $this->publishes([
+            ORCHID_REPEATER_FIELD_PACKAGE_PATH.'/public' => public_path('vendor/rocont/orchid-repeater-field'),
+        ], ['repeater-field.assets', 'laravel-assets']);
     }
 
     private function registerResources(): self
     {
-        $this->publishes([
-            ORCHID_REPEATER_FIELD_PACKAGE_PATH.'/public' => public_path('vendor/Rocont/orchid-repeater-field'),
-        ], ['repeater-field.assets', 'laravel-assets']);
-
         View::composer('platform::app', function () {
             $this->dashboard
-                ->registerResource('scripts', mix('/js/repeater.js', 'vendor/Rocont/orchid-repeater-field'))
-                ->registerResource('stylesheets', mix('/css/repeater.css', 'vendor/Rocont/orchid-repeater-field'));
+                ->registerResource('scripts', mix('/js/repeater.js', 'vendor/rocont/orchid-repeater-field'))
+                ->registerResource('stylesheets', mix('/css/repeater.css', 'vendor/rocont/orchid-repeater-field'));
         });
 
         return $this;
