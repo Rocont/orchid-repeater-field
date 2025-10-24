@@ -261,7 +261,6 @@ export default class extends ApplicationController {
      * Sorting nested fields
      */
     sort() {
-        console.log('sort');
         const self = this;
         const blocks = this.blocksTarget.querySelectorAll(
             ':scope > .repeater-item',
@@ -269,13 +268,13 @@ export default class extends ApplicationController {
         blocks.forEach((block, currentKey) => {
             block.dataset.sort = currentKey;
             const fields = block.querySelectorAll('[data-repeater-name-key]');
-            if (!fields.length && !inputs.length) {
+            if (!fields.length) {
                 return;
             }
 
             fields.forEach((field) => {
-                const {repeaterNameKey} = field.dataset;
-                let originalName = `[${repeaterNameKey.replace('.', '')}]`;
+                const { repeaterNameKey } = field.dataset;
+                let originalName = `[${repeaterNameKey.replace('.', '][')}]`;
 
                 if (repeaterNameKey.endsWith('.')) {
                     originalName += '[]';
@@ -285,10 +284,7 @@ export default class extends ApplicationController {
                 const inputs = field.querySelectorAll('input[type="hidden"]');
                 if (inputs.length) {
                     inputs.forEach((input) => {
-                        let inputOriginalName = originalName;
-                        if (field.getAttribute('multiple')) {
-                            inputOriginalName += '[]';
-                        }
+                        const inputOriginalName = `${originalName}[]`;
                         const resultInputName = `${input.closest(
                             '.repeaters_container',
                         ).dataset.containerKey}[${
@@ -302,7 +298,6 @@ export default class extends ApplicationController {
                 ).dataset.containerKey}[${
                     field.closest('.repeater-item').dataset.sort}]${originalName}`;
 
-                console.log(resultName);
                 if (field.hasAttribute('data-upload-name')) {
                     field.setAttribute('data-upload-name', resultName);
                 }
@@ -326,12 +321,11 @@ export default class extends ApplicationController {
     }
 
     initTiny() {
-        console.log('tiny');
         const elementsWithIdContainingText = document.querySelectorAll('.tinymce');
         elementsWithIdContainingText.forEach((element) => {
             const selector = `#${element.id}`;
             tinymce.init({
-                selector: selector,
+                selector,
                 language: 'ru',
                 plugins: 'preview importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media codesample table charmap pagebreak nonbreaking anchor insertdatetime advlist lists wordcount help charmap quickbars emoticons',
                 toolbar: 'undo redo bold italic underline strikethrough fontfamily fontsize blocks alignleft aligncenter alignright alignjustify outdent indent  numlist bullist forecolor backcolor removeformat pagebreak charmap emoticons fullscreen code preview print insertfile image media link anchor codesample ltr rtl',
@@ -345,36 +339,43 @@ export default class extends ApplicationController {
     example_image_upload_handler = (blobInfo, progress) => new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
 
-        let prefix = function (path) {
-            let prefix = document.head.querySelector('meta[name="dashboard-prefix"]');
-            let pathname = `${prefix.content}${path}`.replace(/\/\/+/g, '/')
+        const prefix = function (path) {
+            // eslint-disable-next-line no-shadow
+            const prefix = document.head.querySelector('meta[name="dashboard-prefix"]');
+            const pathname = `${prefix.content}${path}`.replace(/\/\/+/g, '/');
+            // eslint-disable-next-line no-restricted-globals
             return `${location.protocol}//${location.hostname}${location.port ? `:${location.port}` : ''}${pathname}`;
         };
-        let csrf_token = document.head.querySelector('meta[name="csrf_token"]').getAttribute("content");
+        // eslint-disable-next-line camelcase
+        const csrf_token = document.head.querySelector('meta[name="csrf_token"]').getAttribute('content');
 
         xhr.withCredentials = false;
         xhr.open('POST', prefix('/systems/files'));
 
         xhr.upload.onprogress = (e) => {
+            // eslint-disable-next-line no-mixed-operators
             progress(e.loaded / e.total * 100);
         };
 
         xhr.onload = () => {
             if (xhr.status === 403) {
-                reject({message: 'HTTP Error: ' + xhr.status, remove: true});
+                // eslint-disable-next-line prefer-promise-reject-errors
+                reject({ message: `HTTP Error: ${xhr.status}`, remove: true });
                 return;
             }
 
             if (xhr.status < 200 || xhr.status >= 300) {
-                reject('HTTP Error: ' + xhr.status);
+                // eslint-disable-next-line prefer-promise-reject-errors
+                reject(`HTTP Error: ${xhr.status}`);
                 return;
             }
 
             const json = JSON.parse(xhr.responseText);
             json.location = json.relativeUrl;
 
-            if (!json || typeof json.location != 'string') {
-                reject('Invalid JSON: ' + xhr.responseText);
+            if (!json || typeof json.location !== 'string') {
+                // eslint-disable-next-line prefer-promise-reject-errors
+                reject(`Invalid JSON: ${xhr.responseText}`);
                 return;
             }
 
@@ -382,7 +383,8 @@ export default class extends ApplicationController {
         };
 
         xhr.onerror = () => {
-            reject('Image upload failed due to a XHR Transport error. Code: ' + xhr.status);
+            // eslint-disable-next-line prefer-promise-reject-errors
+            reject(`Image upload failed due to a XHR Transport error. Code: ${xhr.status}`);
         };
 
         const formData = new FormData();
