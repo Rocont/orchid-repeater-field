@@ -8,7 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class RepeaterRequest extends FormRequest
 {
-    public function authorize()
+    public function authorize(): bool
     {
         return $this->user()->hasAccess('platform.index');
     }

@@ -41,13 +41,15 @@
 
     .card {
       margin-top: 0.40rem;
+      border-radius: var(--bs-border-radius);
+      overflow: hidden;
 
       &:first-child {
         margin-top: 0;
       }
       > .card-header {
         padding: 0.50rem 1rem;
-        background-color: rgba(21,20,26,.03)!important;
+        background-color: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color)!important;
         .actions {
           span {
             &.action {
@@ -67,11 +69,6 @@
         }
       }
 
-      > .card-body {
-        padding: 0.75rem;
-        background-color: #fff!important;
-      }
-
       &.sortable-ghost {
         opacity: .5;
       }
@@ -89,6 +86,13 @@
     transform: rotate3d(1, 0, 0, 180deg);
   } 
 
+}
+
+.add-button {
+  display: block;
+  margin-right: auto;
+  margin-left: auto;
+  text-decoration: none;
 }
 
 @keyframes spin {

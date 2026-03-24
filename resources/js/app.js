@@ -1,3 +1,4 @@
+import '../sass/app.scss';
 import FieldsRepeater from './controllers/fields/repeater_controller';
 
 if (typeof window.application !== 'undefined') {
