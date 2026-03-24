@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Rocont\OrchidRepeaterField\Providers;
 
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Orchid\Platform\Dashboard;
-use View;
 
 /**
  * Class ServiceProvider.
@@ -22,7 +23,7 @@ class ServiceProvider extends BaseServiceProvider
         $this->loadViewsFrom(ORCHID_REPEATER_FIELD_PACKAGE_PATH.'/resources/views', 'platform');
 
         $this->registerResources()
-            ->registerProviders()
+            ->registerRoutes()
             ->registerTranslations();
 
         // Publishing is only necessary when using the CLI.
@@ -38,25 +39,15 @@ class ServiceProvider extends BaseServiceProvider
         }
     }
 
-    public function registerProviders(): self
+    protected function registerRoutes(): self
     {
-        foreach ($this->provides() as $provide) {
-            $this->app->register($provide);
-        }
+        Route::domain((string) config('platform.domain'))
+            ->prefix(Dashboard::prefix('/systems'))
+            ->as('platform.')
+            ->middleware(config('platform.middleware.private'))
+            ->group(realpath(ORCHID_REPEATER_FIELD_PACKAGE_PATH.'/routes/systems.php'));
 
         return $this;
-    }
-
-    /**
-     * Get the services provided by the provider.
-     *
-     * @return array
-     */
-    public function provides(): array
-    {
-        return [
-            RouteServiceProvider::class,
-        ];
     }
 
     protected function bootForConsole()
@@ -74,8 +65,8 @@ class ServiceProvider extends BaseServiceProvider
     {
         View::composer('platform::app', function () {
             $this->dashboard
-                ->registerResource('scripts', mix('/js/repeater.js', 'vendor/rocont/orchid-repeater-field'))
-                ->registerResource('stylesheets', mix('/css/repeater.css', 'vendor/rocont/orchid-repeater-field'));
+                ->registerResource('scripts', asset('vendor/rocont/orchid-repeater-field/js/repeater.js'))
+                ->registerResource('stylesheets', asset('vendor/rocont/orchid-repeater-field/css/repeater.css'));
         });
 
         return $this;

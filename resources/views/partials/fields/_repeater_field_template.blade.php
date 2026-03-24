@@ -3,11 +3,8 @@
         <div class="card-header">
             <h5 class="actions">
                 <span class="action card-handle icon-size-fullscreen" data-parent-container-key="@{{it.name}}">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M11 17L7 21L3 17" stroke="#9098A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M7 21V9" stroke="#9098A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M21 7L17 3L13 7" stroke="#9098A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M17 15V3" stroke="#9098A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-up" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M11.5 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L11 2.707V14.5a.5.5 0 0 0 .5.5m-7-14a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L4 13.293V1.5a.5.5 0 0 1 .5-.5"/>
                     </svg>
                 </span>
                 @if($collapse ?? false)
@@ -16,21 +13,20 @@
                 </span>
                 @endif
                 <span class="action icon-plus" data-action="click->fields--repeater#addBlockAfter">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#9098A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M12 8V16" stroke="#9098A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M8 12H16" stroke="#9098A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
+                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                      <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
                     </svg>
                 </span>
                 <span class="action" data-action="click->fields--repeater#deleteBlock">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#9098A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M8 12H16" stroke="#9098A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dash-circle" viewBox="0 0 16 16">
+                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                      <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8"/>
                     </svg>
                 </span>
             </h5>
         </div>
-        <div class="card-body repeater-content">
+        <div class="card-body repeater-content bg-white p-3 py-3 d-flex flex-column gap-3">
             @{{it.content}}
         </div>
     </div>

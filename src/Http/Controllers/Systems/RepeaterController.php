@@ -30,7 +30,7 @@ class RepeaterController extends Controller
     /**
      * How many blocks we need generate at one request.
      */
-    protected \Illuminate\Http\Request|string|array|int $num = 0;
+    protected int $num = 0;
 
     /**
      * Values for the current repeater.
@@ -68,11 +68,9 @@ class RepeaterController extends Controller
     private function build(Repository $query, int $index = 0): View
     {
         $method = new ReflectionMethod($this->layout, 'fields');
-        $method->setAccessible(true);
 
         $queryData = new Repository(collect($query->toArray())->first(null, []));
         $propQuery = new ReflectionProperty($this->layout, 'query');
-        $propQuery->setAccessible(true);
         $propQuery->setValue($this->layout, $queryData);
 
         $fields = $method->invoke($this->layout);
@@ -100,7 +98,6 @@ class RepeaterController extends Controller
                 $name = $field->get('name');
                 $field->addBeforeRender(function () use ($name, $field) {
                     $propInlineAttributes = new ReflectionProperty($field, 'inlineAttributes');
-                    $propInlineAttributes->setAccessible(true);
                     $inlineAttributes = $propInlineAttributes->getValue($field);
                     $inlineAttributes[] = 'data-repeater-name-key';
                     $propInlineAttributes->setValue($field, $inlineAttributes);
@@ -126,23 +123,23 @@ class RepeaterController extends Controller
 
     public function view(RepeaterRequest $request): array
     {
-        $layout = Crypt::decryptString($request->get('layout')) ?? null;
+        $layout = Crypt::decryptString($request->input('layout'));
 
         throw_if(! class_exists($layout), new WrongLayoutPassed($layout));
 
         $this->layout = app($layout);
 
-        $this->repeaterName = $request->get('repeater_name');
-        $this->blocksCount = $request->get('blocks', 0);
-        $this->num = $request->get('num', 0);
-        $this->repeaterData = $request->get('repeater_data', []);
+        $this->repeaterName = $request->input('repeater_name');
+        $this->blocksCount = (int) $request->input('blocks', 0);
+        $this->num = (int) $request->input('num', 0);
+        $this->repeaterData = $request->input('repeater_data');
 
-        if (! is_null($this->repeaterData) && ! in_array(AjaxDataAccess::class, class_uses($this->layout), true)) {
+        if (! empty($this->repeaterData) && ! in_array(AjaxDataAccess::class, class_uses($this->layout), true)) {
             throw new UnsupportedAjaxDataLayout(get_class($this->layout));
         }
 
         if ($request->has('values')) {
-            $this->values = $request->get('values');
+            $this->values = $request->input('values', []);
         }
 
         return $this->handler();

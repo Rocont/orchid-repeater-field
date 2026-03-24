@@ -41,13 +41,26 @@ export default class extends ApplicationController {
         this.initDragDrop();
     }
 
+    compileTemplate(html) {
+        const config = Sqrl.defaultConfig;
+        config.autoEscape = false;
+        return Sqrl.compile(html, config);
+    }
+
+    renderBlock(content, index) {
+        return this.template({
+            name: this.blocksTarget.dataset.containerKey,
+            content,
+            block_key: index,
+            block_count: `${this.options.title} ${index + 1}`,
+        });
+    }
+
     prepareTemplate() {
         const templateElement = document.getElementById(this.data.get('template'));
 
         if (templateElement) {
-            const config = Sqrl.defaultConfig;
-            config.autoEscape = false;
-            this.template = Sqrl.compile(templateElement.innerHTML, config);
+            this.template = this.compileTemplate(templateElement.innerHTML);
         }
 
         return this;
@@ -68,15 +81,8 @@ export default class extends ApplicationController {
         }).then((response) => {
             if (!this.template && response.data.template) {
                 const element = document.createElement('template');
-
                 element.innerHTML = response.data.template.trim();
-
-                const template = element.content.firstChild;
-
-                const config = Sqrl.defaultConfig;
-                config.autoEscape = false;
-
-                this.template = Sqrl.compile(template.innerHTML, config);
+                this.template = this.compileTemplate(element.content.firstChild.innerHTML);
             }
 
             if (!this.template) {
@@ -85,33 +91,24 @@ export default class extends ApplicationController {
                     `Error fetching repeater field template for ${this.options.title} (${this.options.name}).`,
                     'danger',
                 );
-
                 return;
             }
 
             if (response.data.fields) {
                 response.data.fields.forEach((content, index) => {
                     if (this.options.max === null || index < this.options.max) {
-                        this.blocksTarget.insertAdjacentHTML('beforeend', this.template({
-                            name: this.blocksTarget.dataset.containerKey,
-                            content,
-                            block_key: index,
-                            block_count: `${this.options.title} ${index + 1}`,
-                        }));
+                        this.blocksTarget.insertAdjacentHTML('beforeend', this.renderBlock(content, index));
                     }
                 });
             }
 
             this.contentTarget.classList.remove('loading');
-
             this.initMinRequiredBlock();
-
             this.checkEmpty();
         });
     }
 
     initMinRequiredBlock() {
-        //   Exit when required or min aren't set
         if (this.options.required !== true && !this.options.min) {
             return;
         }
@@ -120,8 +117,7 @@ export default class extends ApplicationController {
             ':scope > .repeater-item',
         ).length;
 
-        if (!blocksCount && this.options.required === true && this.options.min
-            === null) {
+        if (!blocksCount && this.options.required === true && this.options.min === null) {
             this.options.min = 1;
         }
 
@@ -152,35 +148,33 @@ export default class extends ApplicationController {
     checkEmpty() {
         this.contentTarget.classList.toggle(
             'empty',
-            this.blocksTarget.querySelectorAll(':scope > .repeater-item').length
-            === 0,
+            this.blocksTarget.querySelectorAll(':scope > .repeater-item').length === 0,
         );
 
         return this;
     }
 
     collapse(event) {
-        const currentBlock = event.currentTarget.closest('.collapse-switch');
+        const card = event.currentTarget.closest('.repeater-item');
 
-        currentBlock.querySelector('.transition').classList.toggle('collapse-action');
-
-        currentBlock.parentElement.parentElement.parentElement.querySelector('.card-body').classList.toggle('collapse');
+        event.currentTarget.querySelector('.transition').classList.toggle('collapse-action');
+        card.querySelector('.card-body').classList.toggle('collapse');
     }
 
-    addNewBlock() {
-        this.addBlock();
+    addNewBlock(event) {
+        this.addBlock(null, event);
 
         return this;
     }
 
     addBlockAfter(event) {
         const currentBlock = event.currentTarget.closest('.repeater-item');
-        this.addBlock(currentBlock);
+        this.addBlock(currentBlock, event);
 
         return this;
     }
 
-    addBlock(currentBlock) {
+    addBlock(currentBlock, event) {
         if (!this.template) {
             this.alert('Error', 'No template is defined.', 'danger');
             return;
@@ -189,8 +183,7 @@ export default class extends ApplicationController {
         const blocksCount = this.blocksTarget.querySelectorAll(
             ':scope > .repeater-item',
         ).length;
-        // eslint-disable-next-line no-restricted-globals
-        const num = event.detail.blocksNum || 1;
+        const num = event?.detail?.blocksNum || 1;
         const repeaterData = this.getRepeaterData();
 
         if (this.options.max && blocksCount >= this.options.max) {
@@ -210,17 +203,12 @@ export default class extends ApplicationController {
         }).then((r) => {
             if (r.data.fields) {
                 r.data.fields.forEach((content, index) => {
-                    const compiledTemplate = this.template({
-                        name: this.blocksTarget.dataset.containerKey,
-                        content,
-                        block_key: index,
-                        block_count: `${this.options.title} ${index + 1}`,
-                    });
+                    const html = this.renderBlock(content, index);
 
                     if (currentBlock != null) {
-                        currentBlock.insertAdjacentHTML('afterend', compiledTemplate);
+                        currentBlock.insertAdjacentHTML('afterend', html);
                     } else {
-                        this.blocksTarget.insertAdjacentHTML('beforeend', compiledTemplate);
+                        this.blocksTarget.insertAdjacentHTML('beforeend', html);
                     }
                 });
             }
@@ -244,7 +232,6 @@ export default class extends ApplicationController {
                 this.data.get('error-title'),
                 this.data.get('min-error-message'),
             );
-
             return;
         }
 
@@ -257,11 +244,7 @@ export default class extends ApplicationController {
         }, 200);
     }
 
-    /**
-     * Sorting nested fields
-     */
     sort() {
-        const self = this;
         const blocks = this.blocksTarget.querySelectorAll(
             ':scope > .repeater-item',
         );
@@ -280,23 +263,16 @@ export default class extends ApplicationController {
                     originalName += '[]';
                 }
 
-                // hack for multiple uploader
                 const inputs = field.querySelectorAll('input[type="hidden"]');
                 if (inputs.length) {
                     inputs.forEach((input) => {
                         const inputOriginalName = `${originalName}[]`;
-                        const resultInputName = `${input.closest(
-                            '.repeaters_container',
-                        ).dataset.containerKey}[${
-                            input.closest('.repeater-item').dataset.sort}]${inputOriginalName}`;
+                        const resultInputName = `${input.closest('.repeaters_container').dataset.containerKey}[${input.closest('.repeater-item').dataset.sort}]${inputOriginalName}`;
                         input.setAttribute('name', resultInputName);
                     });
                 }
 
-                const resultName = `${field.closest(
-                    '.repeaters_container',
-                ).dataset.containerKey}[${
-                    field.closest('.repeater-item').dataset.sort}]${originalName}`;
+                const resultName = `${field.closest('.repeaters_container').dataset.containerKey}[${field.closest('.repeater-item').dataset.sort}]${originalName}`;
 
                 if (field.hasAttribute('data-upload-name')) {
                     field.setAttribute('data-upload-name', resultName);
@@ -307,7 +283,7 @@ export default class extends ApplicationController {
 
         if (this.hasRepeaterBlockCountTarget) {
             this.repeaterBlockCountTargets.forEach((content, index) => {
-                content.innerHTML = `${self.options.title} ${index + 1}`;
+                content.innerHTML = `${this.options.title} ${index + 1}`;
             });
         }
 
@@ -321,76 +297,39 @@ export default class extends ApplicationController {
     }
 
     initTiny() {
-        const elementsWithIdContainingText = document.querySelectorAll('.tinymce');
-        elementsWithIdContainingText.forEach((element) => {
-            const selector = `#${element.id}`;
+        document.querySelectorAll('.tinymce').forEach((element) => {
             tinymce.init({
-                selector,
+                selector: `#${element.id}`,
                 language: 'ru',
                 plugins: 'preview importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media codesample table charmap pagebreak nonbreaking anchor insertdatetime advlist lists wordcount help charmap quickbars emoticons',
                 toolbar: 'undo redo bold italic underline strikethrough fontfamily fontsize blocks alignleft aligncenter alignright alignjustify outdent indent  numlist bullist forecolor backcolor removeformat pagebreak charmap emoticons fullscreen code preview print insertfile image media link anchor codesample ltr rtl',
                 menubar: false,
                 table_header_type: 'section',
-                images_upload_handler: this.example_image_upload_handler,
+                images_upload_handler: this.imageUploadHandler,
             });
         });
     }
 
-    example_image_upload_handler = (blobInfo, progress) => new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-
-        const prefix = function (path) {
-            // eslint-disable-next-line no-shadow
-            const prefix = document.head.querySelector('meta[name="dashboard-prefix"]');
-            const pathname = `${prefix.content}${path}`.replace(/\/\/+/g, '/');
-            // eslint-disable-next-line no-restricted-globals
-            return `${location.protocol}//${location.hostname}${location.port ? `:${location.port}` : ''}${pathname}`;
-        };
-        // eslint-disable-next-line camelcase
-        const csrf_token = document.head.querySelector('meta[name="csrf_token"]').getAttribute('content');
-
-        xhr.withCredentials = false;
-        xhr.open('POST', prefix('/systems/files'));
-
-        xhr.upload.onprogress = (e) => {
-            // eslint-disable-next-line no-mixed-operators
-            progress(e.loaded / e.total * 100);
-        };
-
-        xhr.onload = () => {
-            if (xhr.status === 403) {
-                // eslint-disable-next-line prefer-promise-reject-errors
-                reject({ message: `HTTP Error: ${xhr.status}`, remove: true });
-                return;
-            }
-
-            if (xhr.status < 200 || xhr.status >= 300) {
-                // eslint-disable-next-line prefer-promise-reject-errors
-                reject(`HTTP Error: ${xhr.status}`);
-                return;
-            }
-
-            const json = JSON.parse(xhr.responseText);
-            json.location = json.relativeUrl;
-
-            if (!json || typeof json.location !== 'string') {
-                // eslint-disable-next-line prefer-promise-reject-errors
-                reject(`Invalid JSON: ${xhr.responseText}`);
-                return;
-            }
-
-            resolve(json.location);
-        };
-
-        xhr.onerror = () => {
-            // eslint-disable-next-line prefer-promise-reject-errors
-            reject(`Image upload failed due to a XHR Transport error. Code: ${xhr.status}`);
-        };
-
+    imageUploadHandler = (blobInfo, progress) => {
+        const csrfToken = document.head.querySelector('meta[name="csrf_token"]').getAttribute('content');
         const formData = new FormData();
-        formData.append('_token', csrf_token);
+        formData.append('_token', csrfToken);
         formData.append('file', blobInfo.blob(), blobInfo.filename());
 
-        xhr.send(formData);
-    });
+        return axios.post(this.prefix('/systems/files'), formData, {
+            onUploadProgress: (e) => {
+                progress(e.loaded / e.total * 100);
+            },
+        }).then((response) => {
+            if (!response.data?.relativeUrl) {
+                return Promise.reject('Invalid response');
+            }
+            return response.data.relativeUrl;
+        }).catch((error) => {
+            if (error.response?.status === 403) {
+                return Promise.reject({ message: 'HTTP Error: 403', remove: true });
+            }
+            return Promise.reject(`HTTP Error: ${error.response?.status || error.message}`);
+        });
+    };
 }

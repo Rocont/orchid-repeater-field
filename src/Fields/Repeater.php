@@ -46,9 +46,9 @@ class Repeater extends Field
 
     public function layout(string $layout): self
     {
-        if (! class_exists($layout) && ! (app($layout) instanceof Rows)) {
+        if (! class_exists($layout) || ! is_subclass_of($layout, Rows::class)) {
             throw new \InvalidArgumentException(
-                __('":class" does not exists or not supported. Only rows supported by repeater.', [
+                __('":class" does not exist or is not supported. Only Rows layouts are supported by repeater.', [
                     'class' => $layout,
                 ]));
         }
