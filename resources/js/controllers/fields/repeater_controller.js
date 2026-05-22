@@ -1,5 +1,4 @@
 import Sortable from 'sortablejs';
-import axios from 'axios';
 import * as Sqrl from 'squirrelly';
 import ApplicationController from '~orchid/js/controllers/application_controller';
 
@@ -26,7 +25,8 @@ export default class extends ApplicationController {
     inputs = null;
 
     connect() {
-        if (document.documentElement.hasAttribute('data-turbolinks-preview')
+        if (document.documentElement.hasAttribute('data-turbo-preview')
+            || document.documentElement.hasAttribute('data-turbolinks-preview')
             || document.body.classList.contains('gu-unselectable')) {
             return;
         }
@@ -73,7 +73,7 @@ export default class extends ApplicationController {
 
         this.contentTarget.classList.add('loading');
 
-        axios.post(this.data.get('url'), {
+        window.axios.post(this.data.get('url'), {
             values,
             repeater_name: fieldName,
             layout: this.data.get('layout'),
@@ -194,7 +194,7 @@ export default class extends ApplicationController {
             return;
         }
 
-        axios.post(this.data.get('url'), {
+        window.axios.post(this.data.get('url'), {
             layout: this.data.get('layout'),
             repeater_name: this.repeaterFieldTarget.name,
             blocks: blocksCount,
@@ -316,7 +316,7 @@ export default class extends ApplicationController {
         formData.append('_token', csrfToken);
         formData.append('file', blobInfo.blob(), blobInfo.filename());
 
-        return axios.post(this.prefix('/systems/files'), formData, {
+        return window.axios.post(this.prefix('/systems/files'), formData, {
             onUploadProgress: (e) => {
                 progress(e.loaded / e.total * 100);
             },
